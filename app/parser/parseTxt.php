@@ -7,6 +7,15 @@ use app\Builder\TransacaoBuilder;
 
 class parseTxt
 {
+    /**
+     * @var HeaderBuilder
+     */
+    private $arquivo;
+
+    public function __construct()
+    {
+        $this->parser();
+    }
 
     public function parser()
     {
@@ -18,30 +27,32 @@ class parseTxt
 
             switch ($registro) {
                 case 0:
-                    $this->header($linha);
+                    $header = new HeaderBuilder($linha);
+                    $this->montarArquivo($header);
                     break;
                 case 1:
-                    $this->transacao($linha);
+                    $transacao = new TransacaoBuilder($linha);
+                    $this->montarArquivo($transacao);
                     break;
                 case 9:
-                    $this->trailer($linha);
+                    $trailer = new TrailerBuilder($linha);
+                    $this->montarArquivo($trailer);
                     break;
             }
         }
     }
 
-    // 0
-    public function header($linha){
-        $registro = new HeaderBuilder($linha);
+    public function montarArquivo($registro)
+    {
+        foreach ($registro as $campos) {
+            foreach ($campos as $campo) {
+                $this->arquivo .= $campo;
+            }
+        }
     }
 
-    // 1
-    public function transacao($linha){
-        $registro = new TransacaoBuilder($linha);
-    }
-
-    //9
-    public function trailer($linha){
-        $registro = new TrailerBuilder($linha);
+    public function getArquivo()
+    {
+        return $this->arquivo;
     }
 }
